@@ -3025,3 +3025,7 @@ void QuicSession::OnStreamCountReset() {
 
 #undef ENDPOINT  // undef for jumbo builds
 }  // namespace quic
+
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+#include "arkweb/chromium_ext/net/quiche/quic_session_for_include.cc"
+#endif
