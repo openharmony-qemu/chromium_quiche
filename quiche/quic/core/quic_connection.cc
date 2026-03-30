@@ -102,6 +102,11 @@
 #include "quiche/common/quiche_mem_slice.h"
 #include "quiche/common/quiche_text_utils.h"
 
+#if BUILDFLAG(ARKWEB_LOGGER_REPORT)
+#include "base/base_switches.h"
+#include "base/command_line.h"
+#endif
+
 namespace quic {
 
 class QuicDecrypter;
@@ -221,6 +226,12 @@ QuicConnection::QuicConnection(
       idle_network_detector_(
           this, clock_->ApproximateNow(),
           QuicAlarmProxy(&alarms_, QuicAlarmSlot::kIdleNetworkDetector)),
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+      stream_frame_detector_(
+          std::make_unique<QuicStreamFrameDetector>(
+              this, clock_->ApproximateNow(),
+              QuicAlarmProxy(&alarms_, QuicAlarmSlot::kStreamFrameDetector))),
+#endif
       path_validator_(alarm_factory_, &arena_, this, random_generator_, clock_,
                       &context_),
       ping_manager_(perspective, this,
@@ -1379,6 +1390,11 @@ bool QuicConnection::OnStreamFrame(const QuicStreamFrame& frame) {
     return false;
   }
 
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  // Update stream frame detector.
+  stream_frame_detector_->OnStreamFrameReceived(clock_->ApproximateNow());
+#endif
+
   if (debug_visitor_ != nullptr) {
     debug_visitor_->OnStreamFrame(frame);
   }
@@ -1809,6 +1825,18 @@ bool QuicConnection::OnConnectionCloseFrame(
                       << connection_id() << ", with error: "
                       << QuicErrorCodeToString(frame.quic_error_code) << " ("
                       << frame.error_details << ")";
+
+#if BUILDFLAG(ARKWEB_LOGGER_REPORT)
+      if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+              switches::kEnableLoggerReport)) {
+        LOG_FEEDBACK(INFO) << ENDPOINT
+                           << "Received ConnectionClose for connection: "
+                           << connection_id() << ", with error: "
+                           << QuicErrorCodeToString(frame.quic_error_code)
+                           << " (" << frame.error_details << ")";
+      }
+#endif
+
       break;
     case IETF_QUIC_TRANSPORT_CONNECTION_CLOSE:
       QUIC_DLOG(INFO) << ENDPOINT
@@ -1822,6 +1850,23 @@ bool QuicConnection::OnConnectionCloseFrame(
                                  frame.wire_error_code))
                       << ", error frame type: "
                       << frame.transport_close_frame_type;
+
+#if BUILDFLAG(ARKWEB_LOGGER_REPORT)
+      if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+              switches::kEnableLoggerReport)) {
+        LOG_FEEDBACK(INFO)
+            << ENDPOINT << "Received Transport ConnectionClose for connection: "
+            << connection_id()
+            << ", with error: " << QuicErrorCodeToString(frame.quic_error_code)
+            << " (" << frame.error_details << ")"
+            << ", transport error code: "
+            << QuicIetfTransportErrorCodeString(
+                   static_cast<QuicIetfTransportErrorCodes>(
+                       frame.wire_error_code))
+            << ", error frame type: " << frame.transport_close_frame_type;
+      }
+#endif
+
       break;
     case IETF_QUIC_APPLICATION_CONNECTION_CLOSE:
       QUIC_DLOG(INFO) << ENDPOINT
@@ -1830,6 +1875,20 @@ bool QuicConnection::OnConnectionCloseFrame(
                       << QuicErrorCodeToString(frame.quic_error_code) << " ("
                       << frame.error_details << ")"
                       << ", application error code: " << frame.wire_error_code;
+
+#if BUILDFLAG(ARKWEB_LOGGER_REPORT)
+      if (base::CommandLine::ForCurrentProcess()->HasSwitch(
+              switches::kEnableLoggerReport)) {
+        LOG_FEEDBACK(INFO)
+            << ENDPOINT
+            << "Received Application ConnectionClose for connection: "
+            << connection_id()
+            << ", with error: " << QuicErrorCodeToString(frame.quic_error_code)
+            << " (" << frame.error_details << ")"
+            << ", application error code: " << frame.wire_error_code;
+      }
+#endif
+
       break;
   }
 
@@ -7562,3 +7621,7 @@ QuicConnection::SerializeLargePacketNumberConnectionClosePacket(
 #undef ENDPOINT  // undef for jumbo builds
 
 }  // namespace quic
+
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+#include "arkweb/chromium_ext/net/quiche/quic_connection_for_include.cc"
+#endif

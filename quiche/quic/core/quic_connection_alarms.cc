@@ -84,6 +84,10 @@ std::string QuicAlarmSlotName(QuicAlarmSlot slot) {
       return "MultiPortProbing";
     case QuicAlarmSlot::kIdleNetworkDetector:
       return "IdleNetworkDetector";
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+    case QuicAlarmSlot::kStreamFrameDetector:
+      return "StreamFrameDetector";
+#endif
     case QuicAlarmSlot::kNetworkBlackholeDetector:
       return "NetworkBlackholeDetector";
     case QuicAlarmSlot::kPing:
@@ -100,7 +104,11 @@ QuicAlarmMultiplexer::QuicAlarmMultiplexer(
     : deadlines_({QuicTime::Zero(), QuicTime::Zero(), QuicTime::Zero(),
                   QuicTime::Zero(), QuicTime::Zero(), QuicTime::Zero(),
                   QuicTime::Zero(), QuicTime::Zero(), QuicTime::Zero(),
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+                  QuicTime::Zero(), QuicTime::Zero(), QuicTime::Zero()}),
+#else
                   QuicTime::Zero(), QuicTime::Zero()}),
+#endif
       now_alarm_(alarm_factory.CreateAlarm(
           arena.New<MultiplexerAlarmDelegate>(this), &arena)),
       later_alarm_(alarm_factory.CreateAlarm(
@@ -254,6 +262,11 @@ void QuicAlarmMultiplexer::Fire(QuicAlarmSlot slot) {
     case QuicAlarmSlot::kIdleNetworkDetector:
       connection_->OnIdleDetectorAlarm();
       return;
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+    case QuicAlarmSlot::kStreamFrameDetector:
+      connection_->OnStreamFrameDetectorAlarm();
+      return;
+#endif
     case QuicAlarmSlot::kNetworkBlackholeDetector:
       connection_->OnNetworkBlackholeDetectorAlarm();
       return;
