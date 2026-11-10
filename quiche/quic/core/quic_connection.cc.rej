@@ -1,5 +1,7 @@
 diff a/quiche/quic/core/quic_connection.cc b/quiche/quic/core/quic_connection.cc	(rejected hunks)
-@@ -7562,3 +7621,7 @@ QuicConnection::SerializeLargePacketNumberConnectionClosePacket(
+@@ -7560,5 +7619,9 @@ QuicConnection::SerializeLargePacketNumberConnectionClosePacket(
+ }
+ 
  #undef ENDPOINT  // undef for jumbo builds
  
  }  // namespace quic

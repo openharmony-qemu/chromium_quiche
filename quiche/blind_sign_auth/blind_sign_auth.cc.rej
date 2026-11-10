@@ -1,5 +1,7 @@
 diff a/quiche/blind_sign_auth/blind_sign_auth.cc b/quiche/blind_sign_auth/blind_sign_auth.cc	(rejected hunks)
-@@ -48,7 +49,11 @@ std::string OmitDefault(T value) {
+@@ -46,11 +47,15 @@ std::string OmitDefault(T value) {
+ }
+ 
  constexpr absl::string_view kAttestationProtoTypeUrl =
      "type.googleapis.com/privacy.ppn.AndroidAttestationData";
  constexpr absl::string_view kIssuerHostname =
@@ -11,3 +13,5 @@ diff a/quiche/blind_sign_auth/blind_sign_auth.cc b/quiche/blind_sign_auth/blind_
  constexpr size_t kExpectedExtensionTypesSize = 5;
  constexpr std::array<const uint16_t, kExpectedExtensionTypesSize>
      kExpectedExtensionTypes = {0x0001, 0x0002, 0xF001, 0xF002, 0xF003};
+ 
+ using quiche::protobuf::Any;
