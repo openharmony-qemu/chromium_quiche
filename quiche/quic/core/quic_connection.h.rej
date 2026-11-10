@@ -1,5 +1,7 @@
 diff a/quiche/quic/core/quic_connection.h b/quiche/quic/core/quic_connection.h	(rejected hunks)
-@@ -833,6 +850,11 @@ class QUICHE_EXPORT QuicConnection
+@@ -831,10 +848,15 @@ class QUICHE_EXPORT QuicConnection
+ 
+   // QuicIdleNetworkDetector::Delegate
    void OnHandshakeTimeout() override;
    void OnIdleNetworkDetected() override;
  
@@ -11,3 +13,5 @@ diff a/quiche/quic/core/quic_connection.h b/quiche/quic/core/quic_connection.h	(
    // QuicPingManager::Delegate
    void OnKeepAliveTimeout() override;
    void OnRetransmittableOnWireTimeout() override;
+ 
+   // QuicConnectionIdManagerVisitorInterface
