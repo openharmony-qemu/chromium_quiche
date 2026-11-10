@@ -35,6 +35,9 @@ class QUICHE_EXPORT QuicConnectionAlarmsDelegate {
   virtual void OnDiscardZeroRttDecryptionKeysAlarm() = 0;
   virtual void MaybeProbeMultiPortPath() = 0;
   virtual void OnIdleDetectorAlarm() = 0;
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  virtual void OnStreamFrameDetectorAlarm() = 0;
+#endif
   virtual void OnNetworkBlackholeDetectorAlarm() = 0;
   virtual void OnPingAlarm() = 0;
 
@@ -71,6 +74,10 @@ enum class QuicAlarmSlot : uint8_t {
   kMultiPortProbing,
   // An alarm for QuicIdleNetworkDetector.
   kIdleNetworkDetector,
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  // An alarm for QuicStreamFrameDetector.
+  kStreamFrameDetector,
+#endif
   // An alarm for QuicNetworkBlackholeDetection.
   kNetworkBlackholeDetector,
   // An alarm for QuicPingManager.
