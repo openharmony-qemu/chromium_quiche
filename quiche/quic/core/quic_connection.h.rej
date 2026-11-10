@@ -1,0 +1,13 @@
+diff a/quiche/quic/core/quic_connection.h b/quiche/quic/core/quic_connection.h	(rejected hunks)
+@@ -833,6 +850,11 @@ class QUICHE_EXPORT QuicConnection
+   void OnHandshakeTimeout() override;
+   void OnIdleNetworkDetected() override;
+ 
++#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
++  // QuicStreamFrameDetector::Delegate
++  void OnBrokenDetect() override;
++#endif
++
+   // QuicPingManager::Delegate
+   void OnKeepAliveTimeout() override;
+   void OnRetransmittableOnWireTimeout() override;

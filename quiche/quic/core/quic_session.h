@@ -321,6 +321,11 @@ class QUICHE_EXPORT QuicSession
       const QuicConnectionId& server_connection_id) override;
   bool WillingAndAbleToWrite() const override;
   std::string GetStreamsInfoForLogging() const override;
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  std::string GetServerHostForQuicBroken() const override { return ""; }
+  std::string GetStreamsInfoForQuicBroken() const override;
+  size_t GetNumActiveStreamsForInterface() const override;
+#endif
   void OnPathDegrading() override;
   void OnForwardProgressMadeAfterPathDegrading() override;
   void OnForwardProgressMadeAfterFlowLabelChange() override;

@@ -102,6 +102,9 @@
 #include "quiche/common/quiche_buffer_allocator.h"
 #include "quiche/common/quiche_circular_deque.h"
 #include "quiche/common/quiche_mem_slice.h"
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+#include "arkweb/chromium_ext/net/quiche/quic_stream_frame_detector.h"
+#endif
 
 namespace quic {
 
@@ -236,6 +239,17 @@ class QUICHE_EXPORT QuicConnectionVisitorInterface {
 
   // Called to retrieve streams information for logging purpose.
   virtual std::string GetStreamsInfoForLogging() const = 0;
+
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  // Called to retrieve server host for quic broken purpose.
+  virtual std::string GetServerHostForQuicBroken() const = 0;
+
+  // Called to retrieve streams information for quic broken purpose.
+  virtual std::string GetStreamsInfoForQuicBroken() const = 0;
+
+  // Called to retrieve the number of active streams.
+  virtual size_t GetNumActiveStreamsForInterface() const = 0;
+#endif
 
   // Called when a self address change is observed. Returns true if self address
   // change is allowed.
@@ -546,6 +560,9 @@ class QUICHE_EXPORT QuicConnection
       public QuicSentPacketManager::NetworkChangeVisitor,
       public QuicNetworkBlackholeDetector::Delegate,
       public QuicIdleNetworkDetector::Delegate,
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+      public QuicStreamFrameDetector::Delegate,
+#endif
       public QuicPathValidator::SendDelegate,
       public QuicConnectionIdManagerVisitorInterface,
       public QuicPingManager::Delegate,
@@ -1514,6 +1531,10 @@ class QUICHE_EXPORT QuicConnection
   void OnNetworkBlackholeDetectorAlarm() override;
   void OnPingAlarm() override;
 
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  void OnStreamFrameDetectorAlarm() override;
+#endif
+
   // Create a CONNECTION_CLOSE packet with a large packet number.
   // If this method is called before handshake is confirmed, this method returns
   // nullptr.
@@ -2359,6 +2380,10 @@ class QUICHE_EXPORT QuicConnection
   QuicNetworkBlackholeDetector blackhole_detector_;
 
   QuicIdleNetworkDetector idle_network_detector_;
+
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  std::unique_ptr<QuicStreamFrameDetector> stream_frame_detector_;
+#endif
 
   QuicPathValidator path_validator_;
 
