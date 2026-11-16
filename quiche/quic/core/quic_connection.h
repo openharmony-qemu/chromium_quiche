@@ -867,6 +867,11 @@ class QUICHE_EXPORT QuicConnection
   void OnIdleNetworkDetected() override;
   void OnMemoryReductionTimeout() override;
 
+#if BUILDFLAG(ARKWEB_NETWORK_LOAD)
+  // QuicStreamFrameDetector::Delegate
+  void OnBrokenDetect() override;
+#endif
+
   // QuicPingManager::Delegate
   void OnKeepAliveTimeout() override;
   void OnRetransmittableOnWireTimeout() override;
